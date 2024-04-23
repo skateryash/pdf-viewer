@@ -42,9 +42,11 @@ import PySimpleGUI as sg
 import webbrowser as wb
 from threading import Thread
 
-from googletrans import Translator
-# from gensim.summarization import summarize
 import pyttsx3
+
+from answering import QuestionAnswering
+from translate import TextTranslator
+from summerize import TextSummarizer
 
 DEF_PAD = sg.DEFAULT_ELEMENT_PADDING
 LOGO = b'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'
@@ -123,6 +125,7 @@ class PDFViewer:
         self.scroll_page = False
         self.perv_img_size = [0, 0]
         self.custom_search_option = 'simple'
+        self.output_text = ''
 
     def clear_window(self):
         """
@@ -456,7 +459,7 @@ class PDFViewer:
         ]
 
         nlp_buttons = [
-            [sg.T('NLP BUTTONS',
+            [sg.T('AI Features',
                   # k='-NOTE_PAGENUMBER-',
                   k='-NLP_BUTTONS-',
                   background_color='lightgrey' if self.mode else 'black',
@@ -472,7 +475,27 @@ class PDFViewer:
             ],
             [
                 sg.Button('PDF Text to Speech', key='-BTN_TEXT_TO_SPEECH-', size=(20, 2), pad=DEF_PAD)
+            ],
+            [
+                sg.Button('QnA System', key='-BTN_QNA_SYSTEM-', size=(20, 2), pad=DEF_PAD)
+            ],
+            [
+                sg.Button('NR Recognition', key='-BTN_NAMED_ENTITY_RECOGNITION-', size=(20, 2), pad=DEF_PAD)
+            ],
+            [
+                sg.Button('Text Generation', key='-BTN_TEXT_GENERATION-', size=(20, 2), pad=DEF_PAD)
             ]
+        ]
+        output_area = [
+            # text = "Summary: \nThe legacy of Chatrapati Shivaji Maharaj, the legendary warrior-king born in 1630 in the Western Ghats of Maharashtra, transcends time and geography, embodying the ideals of courage, resilience, and the pursuit of justice. Through his strategic brilliance and military prowess, Shivaji carved out a kingdom amidst the chaos of 17th-century India, establishing the foundation of what would later become the Maratha Empire. His emphasis on decentralized governance, religious tolerance, and empowerment of the common people continues to influence modern concepts of democracy and federalism in India."
+            [sg.T("",
+                  # k='-NOTE_PAGENUMBER-',
+                  k='-OUTPUT-',
+                  background_color='lightgrey' if self.mode else 'black',
+                  text_color='black' if self.mode else 'white',
+                  font="Arial 10 bold",
+                  size=(26, 30))
+             ],
         ]
 
         # notes_frame = [
@@ -528,14 +551,27 @@ class PDFViewer:
                 #     element_justification='c',
                 # ),
                 sg.Frame(
-                    "NLP",
+                    "SMART PDF",
                     title_color="black" if self.mode else 'white',
-                    size=(self.max_page_size[1], self.max_page_size[1]),              # size=(500, self.max_page_size[1]),
+                    size=(250, self.max_page_size[1]),              # size=(500, self.max_page_size[1]), self.max_page_size[1]
                     font="Helvetica 20 bold",
                     layout=nlp_buttons,
                     relief=sg.RELIEF_RIDGE,
                     border_width=4,
                     k="-NLP_FRAME-",
+                    background_color="lightgrey" if self.mode else 'black',
+                    pad=DEF_PAD,
+                    element_justification='c',
+                ),
+                sg.Frame(
+                    "OUTPUT",
+                    title_color="black" if self.mode else 'white',
+                    size=(250, self.max_page_size[1]),  # size=(500, self.max_page_size[1]), self.max_page_size[1]
+                    font="Helvetica 20 bold",
+                    layout=output_area,
+                    relief=sg.RELIEF_RIDGE,
+                    border_width=4,
+                    k="-OUTPUT_FRAME-",
                     background_color="lightgrey" if self.mode else 'black',
                     pad=DEF_PAD,
                     element_justification='c',
@@ -1016,13 +1052,27 @@ class PDFViewer:
         self.win.close()
         self.win = self.create_reader_gui()
 
+    def translate_pdf_handler(self):
+        translator = TextTranslator()
+        # print(self.get_page_text())
+        translated_text = translator.translate_text(text=self.get_page_text(), target_language='hi')
+        # print(translated_text)
+        self.win["-OUTPUT-"].update(translated_text)
+
     def summarize_pdf_handler(self):
-        pass
+        summarizer = TextSummarizer()
+        summary = summarizer.summarize_text(text=self.get_page_text())
+        self.win["-OUTPUT-"].update(summary)
 
     def text_to_speech_handler(self):
         engine = pyttsx3.init()
         engine.say(self.get_page_text())
         engine.runAndWait()
+
+    def question_answer_handler(self, user_question):
+        qa_system = QuestionAnswering()
+        result = qa_system.answer_question(question=user_question, context=self.get_page_text())
+        self.win["-OUTPUT-"].update(result)
 
     def run(self):
         """

@@ -1,2 +1,4 @@
 PySimpleGUI
 PyMuPDF
+gensim
+transformers
