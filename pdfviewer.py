@@ -120,7 +120,6 @@ class PDFViewer:
         self.image_id = self.start_point = self.end_point = None, None, None
         self.searching = False
         self.image_data = [0, 0, 0]
-        # self.TOC_tree = sg.TreeData()
         self.win = self.create_reader_gui()  # window
         self.text_found_pages = []
         self.notes = {}
@@ -134,8 +133,6 @@ class PDFViewer:
         When closes a file everything in application resets
         :return: None
         """
-        # self.TOC_tree = sg.TreeData()
-        # self.win['-TOC_TREE-'](self.TOC_tree)
         self.win['-BTN_DOTS-'](['', ['Whole word', 'Case sensitive']])
         self.current_page = -1
         self.image_id = None
@@ -160,25 +157,15 @@ class PDFViewer:
         """
         try:
             self.document = fitz.open(self.filename)
-            # print(type(self.document))
-            # print(self.document)
         except Exception as ex:
             self.show_popup("Sorry this file can't be opened.")
             return
         self.total_pages = len(self.document)
         self.current_page = 0
         self.update_cur_page()
-        # self.load_notes()
         self.pages = [None] * self.total_pages
         self.annotated_pages = []
         self.image_data = self.get_page_data(self.current_page)
-        # self.TOC_tree = sg.TreeData()
-        # toc = self.document.get_toc()
-        # if toc:
-        #     self.create_toc(toc, "", toc[0][0])
-
-        # updating all elements
-        # self.win['-TOC_TREE-'](values=self.TOC_tree)
         self.update_image()
         self.update_cur_page()
         self.win['-TOTAL_PAGES-'](value="/ {}".format(self.total_pages))
@@ -222,51 +209,6 @@ class PDFViewer:
                          image_size=image_size,
                          )
 
-    # def fit_toc_label(self, length, data):
-    #     """
-    #     Adjust heading in a way that it fits in table of content
-    #     :param length: required length of chars to diaply in one line
-    #     :param data: heading
-    #     :return: Adjusted heading string
-    #     """
-    #     counter, text = 0, ""
-    #     for txt in data.split():
-    #         counter += len(txt) + 1
-    #         if counter < length:
-    #             text += txt + " "
-    #         else:
-    #             counter = 0
-    #             text += '\n' + txt
-    #     return text
-    #
-    # def create_toc(self, contents, parent, phead):
-    #     """
-    #     Table of contents extracted from PDF file is in form of nested list. This function converts that nested list
-    #     in to a parent-child data structure, so that all heading and sub-heading can be associated
-    #     :param contents: list of child
-    #     :param parent: Parent heading of sub-heading
-    #     :param phead: key of the parent heading
-    #     :return: None
-    #     """
-    #     cons = iter(contents)
-    #     for content in cons:
-    #         i = contents.index(content)
-    #         head, text = content[0], content[1]
-    #         text = self.fit_toc_label(25, text)
-    #         if head == phead:
-    #             i += 1
-    #             k = ''.join(text.split())
-    #             # self.TOC_tree.insert(parent, k, text, content[2])
-    #         else:
-    #             j = i
-    #             while True:
-    #                 j += 1
-    #                 if j < len(contents) and contents[j][0] != phead:
-    #                     next(cons, None)
-    #                 else:
-    #                     break
-    #             self.create_toc(contents[i:j], k, head)
-
     def create_layout(self):
         """
         Create the COMPLETE GUI of the application. Interface is divided into rows, nested list containing elements
@@ -277,44 +219,6 @@ class PDFViewer:
             ['&File', ['&Open', '---', 'Properties', '&Close']],
             ['&Help', '&About Developer...'],
         ]
-
-        # self.tree = sg.Tree(data=self.TOC_tree,
-        #                     headings=['No#', ],
-        #                     col0_width=27,
-        #                     col_widths=[0],
-        #                     select_mode='browse',
-        #                     k='-TOC_TREE-',
-        #                     num_rows=30,
-        #                     enable_events=True,
-        #                     font='Consolas 12 bold',
-        #                     row_height=40,
-        #                     tooltip="Table of contents",
-        #                     header_font=('Consolas 12 bold'),
-        #                     pad=(0, 0),
-        #                     text_color='black' if self.mode else 'white',
-        #                     background_color='lightgrey' if self.mode else 'black',
-        #                     selected_row_colors='black on white',
-        #                     )
-        # frame_contents = [
-        #     [self.tree],
-        # ]
-
-        # column_content = [
-        #     [
-        #         sg.Frame(
-        #             "Table of Contents",
-        #             title_color="black" if self.mode else 'white',
-        #             size=(200, self.max_page_size[1]),
-        #             font="Consolas 20 bold",
-        #             layout=frame_contents,
-        #             relief=sg.RELIEF_RIDGE,
-        #             border_width=4,
-        #             k="-CONTENTS_FRAME-",
-        #             background_color='lightgrey' if self.mode else 'black',
-        #             pad=DEF_PAD,
-        #         ),
-        #     ]
-        # ]
 
         frame_main = [
             [
@@ -499,62 +403,18 @@ class PDFViewer:
              ],
         ]
 
-        # notes_frame = [
-        #     [sg.T('Page # 0',
-        #           k='-NOTE_PAGENUMBER-',
-        #           background_color='lightgrey' if self.mode else 'black',
-        #           text_color='black' if self.mode else 'white',
-        #           font="Consolas 15 bold",
-        #           size=(12, 1))
-        #      ],
-        #     [sg.Multiline("",
-        #                   size=(40, 30),
-        #                   text_color='black' if self.mode else 'white',
-        #                   k='-NOTE_TEXT-',
-        #                   pad=DEF_PAD,
-        #                   font="Helvetica 13",
-        #                   background_color='white' if self.mode else 'black',
-        #                   autoscroll=True,
-        #                   tooltip='Write note'
-        #                   ),
-        #      ],
-        #     [sg.CB('Save this note',
-        #            font="Helvetica 13 bold",
-        #            k="-SAVE_NOTE-",
-        #            text_color='black' if self.mode else 'white',
-        #            background_color='lightgrey' if self.mode else 'black',
-        #            default=True,
-        #            enable_events=True
-        #            ),
-        #      ]
-        # ]
-
         return [
             [
                 sg.Menu(menu, k="-MENU-"),
-                # sg.Col(column_content, scrollable=False, k="check"),
                 sg.VerticalSeparator(pad=DEF_PAD),
                 sg.Frame(title="", layout=main_col,
                          background_color="lightgrey",
                          relief=sg.RELIEF_RAISED, k='-FRAME_MAIN-'),
                 sg.VerticalSeparator(pad=DEF_PAD),
-                # sg.Frame(
-                #     "Notes",
-                #     title_color="black" if self.mode else 'white',
-                #     size=(50, self.max_page_size[1]),
-                #     font="Helvetica 20 bold",
-                #     layout=notes_frame,
-                #     relief=sg.RELIEF_RIDGE,
-                #     border_width=4,
-                #     k="-NOTES_FRAME-",
-                #     background_color="lightgrey" if self.mode else 'black',
-                #     pad=DEF_PAD,
-                #     element_justification='c',
-                # ),
                 sg.Frame(
                     "SMART PDF",
                     title_color="black" if self.mode else 'white',
-                    size=(250, self.max_page_size[1]),              # size=(500, self.max_page_size[1]), self.max_page_size[1]
+                    size=(250, self.max_page_size[1]),
                     font="Helvetica 20 bold",
                     layout=nlp_buttons,
                     relief=sg.RELIEF_RIDGE,
@@ -567,7 +427,7 @@ class PDFViewer:
                 sg.Frame(
                     "OUTPUT",
                     title_color="black" if self.mode else 'white',
-                    size=(250, self.max_page_size[1]),  # size=(500, self.max_page_size[1]), self.max_page_size[1]
+                    size=(250, self.max_page_size[1]),
                     font="Helvetica 20 bold",
                     layout=output_area,
                     relief=sg.RELIEF_RIDGE,
@@ -577,7 +437,6 @@ class PDFViewer:
                     pad=DEF_PAD,
                     element_justification='c',
                 ),
-
             ],
         ]
 
@@ -598,10 +457,6 @@ class PDFViewer:
         Initializes the GUI and set all settings
         :return: GUI window
         """
-        # To add a spsh screen just uncomment this code
-        # if self.mode:
-        # sg.Window('', [[sg.Image(data=SPLASH_SCREEN)]], transparent_color=sg.theme_background_color(), no_titlebar=True, keep_on_top=True).read(timeout=1000, close=True)
-
         title = "{} | PyPDFViewer".format(self.filename, self.total_pages)
         sg.DEFAULT_TOOLTIP_TIME = 10
         if self.mode:
@@ -724,12 +579,10 @@ class PDFViewer:
             self.current_page = self.total_pages - 1
         pno = self.current_page + 1
         self.win["-PAGE_NUMBER-"](str(pno))
-        # self.win['-NOTE_PAGENUMBER-']('Page # ' + str(pno))
         try:
             page_note = self.notes[pno]
         except KeyError as error:
             page_note = ''
-        # self.win['-NOTE_TEXT-'](value=page_note)
 
     def update_match_status(self, total=None):
         """
@@ -941,7 +794,6 @@ class PDFViewer:
         :return: Whether page is updated
         """
         if not self.current_page == (self.total_pages - 1):
-            # self.save_note()
             self.update_cur_page(1)
             return True
 
@@ -951,50 +803,8 @@ class PDFViewer:
         :return: Whether page is updated
         """
         if self.current_page > 0:
-            # self.save_note()
             self.update_cur_page(-1)
             return True
-
-    # def save_note(self):
-    #     """
-    #     Save the note, associating it with current page
-    #     :return: None
-    #     """
-    #     note = self.win['-NOTE_TEXT-'].get()
-    #     if self.win['-SAVE_NOTE-'].get() and note:
-    #         self.notes[int(self.win["-PAGE_NUMBER-"].get())] = note
-
-    # def save_notes_to_file(self):
-    #     """
-    #     Save all note to a text file
-    #     :return: None
-    #     """
-    #     self.save_note()
-    #     with open(self.filename.split('/')[-1].split('.')[0] + '_notes.txt', 'w', encoding="utf-8") as note_file:
-    #         note_file.write('\t\tاس File میں ترمیم نہ کریں\n\n')
-    #         for page, note in self.notes.items():
-    #             if note and note.split():
-    #                 underline = ''.join(['=' for _ in range(len(str(page)) + 1)])
-    #                 note_file.write("{}\n{}\n{}\n".format(page, underline, note))
-    #
-    # def load_notes(self):
-    #     """
-    #     Load note form text file
-    #     :return: None
-    #     """
-    #     try:
-    #         with open(self.filename.split('/')[-1].split('.')[0] + '_notes.txt', 'r', encoding="utf-8") as note_file:
-    #             count = 21
-    #             for line in note_file:
-    #                 try:
-    #                     page_number = int(line)
-    #                     count = 2
-    #                 except ValueError as ex:
-    #                     count -= 1
-    #                 if not count:
-    #                     self.notes[page_number] = line
-    #     except Exception as e:
-    #         pass
 
     def close_popup(self, text=None):
         """
@@ -1013,13 +823,6 @@ class PDFViewer:
                                keep_on_top=True,
                                non_blocking=False
                                )
-
-    # def unselect_TOC(self):
-    #     """
-    #     Set focus away from table of contents, otherwise clicking down/up key will take you next/previous heading
-    #     :return: None
-    #     """
-    #     self.win['-FRAME_MAIN-'].set_focus(force=True)
 
     def change_width(self):
         """
@@ -1077,9 +880,7 @@ class PDFViewer:
 
     def translate_pdf_handler(self):
         translator = TextTranslator()
-        # print(self.get_page_text())
         translated_text = translator.translate_text(text=self.get_page_text(), target_language='hi')
-        # print(translated_text)
         self.win["-OUTPUT-"].update(translated_text)
 
     def summarize_pdf_handler(self):
@@ -1129,7 +930,6 @@ class PDFViewer:
                 event = self.Event(evt)
                 if event.quit():
                     if self.close_popup("Do you want to close the PDF Viewer?") == 'Yes':
-                        # self.save_notes_to_file()
                         self.win.close()
                         break
                 change_page = False
@@ -1161,7 +961,6 @@ class PDFViewer:
                     if new_file:
                         if os.path.isfile(new_file):
                             if self.filename:
-                                # self.save_notes_to_file()
                                 self.clear_window()
                             self.filename = new_file
                             self.fill_window()
@@ -1183,12 +982,11 @@ class PDFViewer:
                                 page = int(value["-PAGE_NUMBER-"])
                                 if self.total_pages >= page > 0:
                                     self.current_page = page - 1
-                                    # self.save_note()
                                     change_page = True
                                 else:
                                     raise Exception()
                             except Exception as error:
-                                self.show_popup("اس دستاویز میں ایسا کوئی صفحہ نمبر موجود نہیں ہے")
+                                self.show_popup("")
                             self.update_cur_page()
                         elif elem == self.win['-FIND_TEXT-']:
                             if self.searching:
@@ -1197,28 +995,12 @@ class PDFViewer:
                                 self.start_search()
                         elif elem == self.win['-ZOOM_VAL-']:
                             change_page = True
-                    # elif event.toc():
-                    #     try:
-                    #         self.current_page = self.TOC_tree.tree_dict[value['-TOC_TREE-'][0]].values
-                    #     except IndexError as error:
-                    #         pass
-                    #     self.save_note()
-                    #     self.update_cur_page(-1)
-                    #     change_page = True
-
-                    # elif event.mouse_next():
-                    #     if self.scroll_page:
-                    #         change_page = self.act_on_next_page()
                     elif event.page_down():
                         change_page = self.act_on_next_page()
                     elif event.down_arrow_key():
                         change_page = self.act_on_next_page()
                     elif event.right_arrow_key():
                         change_page = self.act_on_next_page()
-
-                    # elif event.mouse_prior():
-                    #     if self.scroll_page:
-                    #         change_page = self.act_on_previous_page()
                     elif event.page_up():
                         change_page = self.act_on_previous_page()
                     elif event.up_arrow_key():
@@ -1227,12 +1009,10 @@ class PDFViewer:
                         change_page = self.act_on_previous_page()
 
                     elif event.first_page():
-                        # self.save_note()
                         self.current_page = 0
                         self.update_cur_page()
                         change_page = True
                     elif event.last_page():
-                        # self.save_note()
                         change_page = self.current_page = self.total_pages - 1
                         self.update_cur_page()
 
@@ -1259,7 +1039,6 @@ class PDFViewer:
                         self.change_width()
                     elif event.close_file():
                         if self.close_popup() == 'Yes':
-                            # self.save_notes_to_file()
                             self.win["-OUTPUT-"].update("")
                             self.clear_window()
                     elif event.mode():
@@ -1267,7 +1046,6 @@ class PDFViewer:
                         change_page = True
 
                     if change_page:
-                        # self.unselect_TOC()
                         self.image_data = self.get_page_data(self.current_page)
                         self.update_image()
 
@@ -1283,9 +1061,6 @@ class PDFViewer:
 
         def __init__(self, event):
             self.event = event
-
-        # def toc(self):
-        #     return self.event == '-TOC_TREE-'
 
         def cb_search(self):
             return self.event.startswith('-SEARCH_CB-')
@@ -1389,28 +1164,8 @@ class PDFViewer:
         def sentiment(self):
             return self.event == '-BTN_SENTIMENT-'
 
-        # Function to convert the entire PDF text to speech
-        # def text_to_speech(self):
-        #     try:
-        #         print("Testing")
-        #         print(self.docu)
-        #         text = ""
-        #         for page_number in range(viewer.total_pages):
-        #             page_text = viewer.get_page_text(page_number)
-        #             text += page_text
-        #         engine = pyttsx3.init()
-        #         engine.say(text)
-        #         engine.runAndWait()
-        #
-        #     except Exception as e:
-        #         viewer.show_popup("Text-to-Speech failed.")
-        #
-        #     return self.event == '-BTN_TEXT_TO_SPEECH-'
-
         def __str__(self):
             return self.event
-
-
 
 
 if __name__ == '__main__':
